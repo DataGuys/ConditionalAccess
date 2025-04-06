@@ -2,30 +2,32 @@
 # Copy and paste into Azure Cloud Shell to quickly analyze your tenant
 
 # Install required Microsoft Graph modules
+```
 Write-Host "Installing required Microsoft Graph modules..." -ForegroundColor Cyan
 Install-Module Microsoft.Graph.Authentication, Microsoft.Graph.Identity.SignIns, Microsoft.Graph.Identity.DirectoryManagement, Microsoft.Graph.DeviceManagement -Force -AllowClobber -ErrorAction SilentlyContinue
-
-# Direct download of the module
-Write-Host "Downloading ConditionalAccessAnalyzer module..." -ForegroundColor Cyan
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/DataGuys/ConditionalAccess/refs/heads/main/ConditionalAccessAnalyzer.psm1" -OutFile "~/ConditionalAccessAnalyzer.psm1"
-
-# Import the module
-Write-Host "Importing module..." -ForegroundColor Cyan
-Import-Module ~/ConditionalAccessAnalyzer.psm1
-
+```
+# Direct import of the module
+```
+Write-Host "Importing ConditionalAccessAnalyzer module directly from GitHub..." -ForegroundColor Cyan
+Import-Module (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/DataGuys/ConditionalAccess/refs/heads/main/ConditionalAccessAnalyzer.psm1" -UseBasicParsing).Content
+```
 # Connect to Microsoft Graph
+```
 Write-Host "Connecting to Microsoft Graph..." -ForegroundColor Cyan
 Connect-CAAnalyzer
-
+```
 # Run the compliance check
+```
 Write-Host "Running comprehensive Conditional Access compliance check..." -ForegroundColor Cyan
 $results = Invoke-CAComplianceCheck
-
+```
 # Generate HTML report
+```
 Write-Host "Generating HTML report..." -ForegroundColor Cyan
 Export-CAComplianceReport -Results $results -Format HTML -Path "~/CAReport.html"
-
+```
 # Display summary of findings
+```
 Write-Host "`nSUMMARY OF FINDINGS:" -ForegroundColor Green
 Write-Host "Compliance Score: $($results.ComplianceScore)%" -ForegroundColor $(if ($results.ComplianceScore -ge 80) { "Green" } elseif ($results.ComplianceScore -ge 60) { "Yellow" } else { "Red" })
 
@@ -53,3 +55,4 @@ Write-Host "`nTo get more details in the console:" -ForegroundColor Cyan
 Write-Host "PS> `$results.Checks.AdminMFA" -ForegroundColor White
 Write-Host "PS> `$results.Checks.UserMFA" -ForegroundColor White
 Write-Host "PS> `$results.Checks.RiskPolicies.RiskBasedPolicies" -ForegroundColor White
+```
