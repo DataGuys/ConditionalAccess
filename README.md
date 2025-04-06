@@ -1,58 +1,107 @@
-# ConditionalAccessAnalyzer Quick Start for Azure Cloud Shell
-# Copy and paste into Azure Cloud Shell to quickly analyze your tenant
+# Conditional Access Analyzer
 
-# Install required Microsoft Graph modules
-```
-Write-Host "Installing required Microsoft Graph modules..." -ForegroundColor Cyan
-Install-Module Microsoft.Graph.Authentication, Microsoft.Graph.Identity.SignIns, Microsoft.Graph.Identity.DirectoryManagement, Microsoft.Graph.DeviceManagement -Force -AllowClobber -ErrorAction SilentlyContinue
-```
-# Direct import of the module
-```
-Write-Host "Importing ConditionalAccessAnalyzer module directly from GitHub..." -ForegroundColor Cyan
+A comprehensive PowerShell module for analyzing and assessing Conditional Access policies in Microsoft Entra ID (formerly Azure AD).
+
+## Overview
+
+The Conditional Access Analyzer is designed to help security professionals and Identity administrators evaluate their Conditional Access configuration against security best practices. It performs automated checks across all key Zero Trust pillars including MFA enforcement, device compliance, risk-based access, and data protection.
+
+![Conditional Access Report Example](https://raw.githubusercontent.com/DataGuys/ConditionalAccess/main/assets/report-example.png)
+
+## Features
+
+- **MFA Enforcement Analysis**
+  - Verify MFA requirements for privileged administrative roles
+  - Validate MFA policies for regular users across applications
+  - Identify admin roles without proper MFA protection
+
+- **Device Compliance Validation**
+  - Check for device compliance requirements in access policies
+  - Validate token-to-device binding settings
+  - Analyze session control configurations
+
+- **Risk-Based Policy Evaluation**
+  - Assess sign-in risk policies
+  - Evaluate user risk-based protections
+  - Provide recommendations for risk-based controls
+
+- **Mobile Application Management**
+  - Verify MAM/APP policies for BYOD scenarios
+  - Check for cut/copy/paste restrictions
+  - Review data protection controls for mobile devices
+
+- **Zero Trust Network Access**
+  - Analyze Microsoft Defender for Cloud Apps integration
+  - Check Global Secure Access configuration
+  - Evaluate zero-trust network access policies
+
+- **Comprehensive Reporting**
+  - Generate detailed HTML reports with compliance scoring
+  - Export results in CSV and JSON formats
+  - Provide actionable recommendations
+
+## Prerequisites
+
+- PowerShell 5.1 or higher
+- The following Microsoft Graph PowerShell modules:
+  - Microsoft.Graph.Authentication
+  - Microsoft.Graph.Identity.SignIns
+  - Microsoft.Graph.Identity.DirectoryManagement
+  - Microsoft.Graph.DeviceManagement
+- Appropriate permissions in your Entra ID tenant:
+  - Policy.Read.All
+  - Directory.Read.All
+  - DeviceManagementConfiguration.Read.All
+  - DeviceManagementApps.Read.All
+  - IdentityRiskyUser.Read.All
+  - NetworkAccessPolicy.Read.All
+
+## Installation
+
+### Using Azure Cloud Shell (Recommended)
+
+**Option 1: Direct Import (Fastest)**
+
+Import the module directly from GitHub with a single line:
+
+```powershell
+# One-line direct import (no download needed)
 Import-Module (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/DataGuys/ConditionalAccess/refs/heads/main/ConditionalAccessAnalyzer.psm1" -UseBasicParsing).Content
 ```
-# Connect to Microsoft Graph
-```
-Write-Host "Connecting to Microsoft Graph..." -ForegroundColor Cyan
-Connect-CAAnalyzer
-```
-# Run the compliance check
-```
-Write-Host "Running comprehensive Conditional Access compliance check..." -ForegroundColor Cyan
-$results = Invoke-CAComplianceCheck
-```
-# Generate HTML report
-```
-Write-Host "Generating HTML report..." -ForegroundColor Cyan
-Export-CAComplianceReport -Results $results -Format HTML -Path "~/CAReport.html"
-```
-# Display summary of findings
-```
-Write-Host "`nSUMMARY OF FINDINGS:" -ForegroundColor Green
-Write-Host "Compliance Score: $($results.ComplianceScore)%" -ForegroundColor $(if ($results.ComplianceScore -ge 80) { "Green" } elseif ($results.ComplianceScore -ge 60) { "Yellow" } else { "Red" })
 
-Write-Host "`nKey Recommendations:" -ForegroundColor Cyan
-if ($results.Checks.AdminMFA.AdminMFARequired -eq $false) {
-    Write-Host "- Admin MFA: $($results.Checks.AdminMFA.Recommendation)" -ForegroundColor Red
-}
-if ($results.Checks.UserMFA.BroadUserMFARequired -eq $false) {
-    Write-Host "- User MFA: $($results.Checks.UserMFA.Recommendation)" -ForegroundColor Red
-}
-if ($results.Checks.DeviceCompliance.BroadDeviceComplianceRequired -eq $false) {
-    Write-Host "- Device Compliance: $($results.Checks.DeviceCompliance.Recommendation)" -ForegroundColor Red
-}
-if ($results.Checks.RiskPolicies.SignInRiskPoliciesConfigured -eq $false) {
-    Write-Host "- Risk-Based Access: $($results.Checks.RiskPolicies.Recommendation)" -ForegroundColor Red
-}
+**Option 2: Clone Repository**
 
-Write-Host "`nTo view the detailed HTML report:" -ForegroundColor Cyan
-Write-Host "1. Click on the '...' menu in the top-right corner of Cloud Shell" -ForegroundColor White
-Write-Host "2. Select 'Download'" -ForegroundColor White
-Write-Host "3. Navigate to ~/CAReport.html" -ForegroundColor White
-Write-Host "4. Download and open the file in your browser" -ForegroundColor White
+1. Open [Azure Cloud Shell](https://shell.azure.com/) in PowerShell mode
 
-Write-Host "`nTo get more details in the console:" -ForegroundColor Cyan
-Write-Host "PS> `$results.Checks.AdminMFA" -ForegroundColor White
-Write-Host "PS> `$results.Checks.UserMFA" -ForegroundColor White
-Write-Host "PS> `$results.Checks.RiskPolicies.RiskBasedPolicies" -ForegroundColor White
+2. Clone this repository directly in Cloud Shell:
+```powershell
+git clone https://github.com/DataGuys/ConditionalAccess.git
+cd ConditionalAccess
 ```
+
+3. Import the module:
+```powershell
+Import-Module ./ConditionalAccessAnalyzer.psm1
+```
+
+### Local Installation (Alternative)
+
+If you prefer to run locally:
+
+```powershell
+# Option 1: Direct import (no download needed)
+Import-Module (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/DataGuys/ConditionalAccess/refs/heads/main/ConditionalAccessAnalyzer.psm1" -UseBasicParsing).Content
+
+# Option 2: Clone repository
+git clone https://github.com/DataGuys/ConditionalAccess.git
+Import-Module .\ConditionalAccess\ConditionalAccessAnalyzer.psm1
+```
+
+## Usage
+
+### Quick Start (One-liner to connect)
+
+Copy and paste this one-liner into Azure Cloud Shell to ensure proper connectivity:
+
+```powershell
+Install-Module Microsoft.Graph.Authentication, Microsoft.Graph.Identity.SignIns, Microsoft.Graph.Identity.DirectoryManagement, Microsoft.Graph.DeviceManagement -Force -AllowClobber; Connect-MgGraph -Scopes "Policy.Read.All","Directory.Rea
